@@ -1,25 +1,21 @@
 using UnityEngine;
+using Zenject;
 
 namespace SceneStateSystem
 {
     public class SceneStateSwaper : MonoBehaviour
     {
-        private SceneStateManager stateManager;
-
-        void Start()
-        {
-            stateManager = new SceneStateManager(new FirstPlayerTurnState());
-        }
+        [Inject] private IStateManager stateManager;
 
         public void ChangeState()
         {
             if (stateManager.curentStateName == SceneStatesNames.FirstPlayerTurn)
             {
-                stateManager.SwapState(new SecondPlayerTurn());
+                stateManager.SwapState(SceneStatesNames.SecondPlayerTurn);
             }
             else
             {
-                stateManager.SwapState(new FirstPlayerTurnState());
+                stateManager.SwapState(SceneStatesNames.FirstPlayerTurn);
             }
         }
 
