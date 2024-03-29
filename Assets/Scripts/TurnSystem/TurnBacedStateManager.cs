@@ -1,62 +1,83 @@
+using System.Collections.Generic;
+using UnityEngine;
+
 namespace SceneStateSystem
 {
     public class TurnBacedStateManager : SceneStateManager, IStateManager
     {
-        private enum Turn
-        {
-            First,
-            Second
-        }
         public int round { get; private set; }
-        public SceneStatesNames currentTurn { get => TurnToState(_currentTurn); }
 
-        private Turn _currentTurn;
+        private int _currentTurn = 0;
+        private List<int> _playersID = new();
+        private Dictionary<int, IPlayerTurn> _playersTurnsStates = new();
 
-        private int player1ID = 1;
-        private int player2ID = 2;
+        public delegate void NewPlayerTurn(IPlayerTurn newState);
+        public event NewPlayerTurn OnNewPlayerTurn;
 
-        public void SetPlayerIDs(int p1ID, int p2ID)
+        public bool IsPlayerTurn(int playerId)
         {
-            player1ID = p1ID;
-            player2ID = p2ID;
-        }
-
-        public bool IsPlayer1Turn()
-        {
-            return (player1ID == GetCurrentPlayerID());
-        }
-
-        public bool IsPlayer2Turn()
-        {
-            return (player2ID == GetCurrentPlayerID());
+            return _playersID[_currentTurn] == playerId;
         }
 
         private int GetCurrentPlayerID()
         {
-            return _currentTurn == Turn.First ? player1ID : player2ID;
+            return _playersID[_currentTurn];
         }
 
         public override void SwapState(SceneStatesNames stateName)
         {
+            if(stateName == SceneStatesNames.PlayerTurn)
+            {
+                int currPlayerID = GetCurrentPlayerID();
+                SwapState(GetStateKeyByPlayerID(currPlayerID));
+                OnNewPlayerTurn?.Invoke(_playersTurnsStates[currPlayerID]);
+                return;
+            }
             base.SwapState(stateName);
         }
 
         public void SwitchTurn(int playerId)
         {
-            if (playerId != GetCurrentPlayerID())
-                return;
-
-            _currentTurn = _currentTurn == Turn.First ? Turn.Second : Turn.First;
-            if (_currentTurn == Turn.First)
+            if (!IsPlayerTurn(playerId))
             {
-                round++;
+                Debug.Log("ThisPlayerCanMaceTurn");
+                return;
             }
-            SwapState(TurnToState(_currentTurn));
+            NextTurn();
+            SwapState(SceneStatesNames.PlayerTurn);
         }
 
-        private SceneStatesNames TurnToState(Turn turn)
+        public void AddPlayer(int playerID)
         {
-            return turn == Turn.First ? SceneStatesNames.FirstPlayerTurn : SceneStatesNames.SecondPlayerTurn;
+            _playersID.Add(playerID);
+            string StateKey = GetStateKeyByPlayerID(playerID);
+
+            _playersTurnsStates.Add(playerID, new PlayerTurn(playerID));
+            _states.Add(StateKey, _playersTurnsStates[playerID]);
+            Debug.Log("Playerr add with id" + playerID);
+        }
+
+        public void RemovePlayer(int palyerID)
+        {
+            if (IsPlayerTurn(palyerID))
+            {
+                SwitchTurn(palyerID);
+            }
+            _playersID.Remove(palyerID);
+            _states.Remove(GetStateKeyByPlayerID(palyerID));
+
+        }
+
+        private void NextTurn()
+        {
+            _currentTurn++;
+            round += _currentTurn / _playersID.Count;
+            _currentTurn %= _playersID.Count;
+        }
+
+        private string GetStateKeyByPlayerID(int PlayerID) 
+        { 
+            return "PlayerTurn" + PlayerID;
         }
     }
 

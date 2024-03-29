@@ -8,26 +8,19 @@ namespace SceneStateSystem
     {
         private ISceneState _currentState;
         public SceneStatesNames curentStateName { get => _currentState.name; }
-        private Dictionary<SceneStatesNames, ISceneState> _states;
+        protected Dictionary<string, ISceneState> _states = new();
 
         public delegate void SceneStateChanged(SceneStatesNames newState);
         public event SceneStateChanged OnSceneStateChanged;
-        private void OnEnable()
-        {
-            InitialStates();
-            _states.TryGetValue(SceneStatesNames.FirstPlayerTurn, out _currentState);
-            _currentState.StateBegin();
 
-            OnSceneStateChanged?.Invoke(curentStateName);
-        }
-
+        [ClientRpc]
         public virtual void SwapState(SceneStatesNames stateName)
         {
-            RpcSwapTurn(stateName);
+            SwapState(stateName.ToString());
         }
 
         [ClientRpc]
-        public virtual void RpcSwapTurn(SceneStatesNames stateName)
+        public virtual void SwapState(string stateName)
         {
             _currentState?.StateEnd();
             if (!_states.TryGetValue(stateName, out _currentState))
@@ -37,26 +30,6 @@ namespace SceneStateSystem
             _currentState.StateBegin();
 
             OnSceneStateChanged?.Invoke(curentStateName);
-        }
-
-        public bool IsLocalPlayerTurn()
-        {
-            if (isLocalPlayer && _currentState.name == SceneStatesNames.FirstPlayerTurn)
-                return true;
-
-            if (!isLocalPlayer && !(_currentState.name == SceneStatesNames.FirstPlayerTurn))
-                return true;
-
-            return false;
-        }
-
-        protected virtual void InitialStates()
-        {
-            _states = new Dictionary<SceneStatesNames, ISceneState>
-            {
-                { SceneStatesNames.FirstPlayerTurn, new FirstPlayerTurnState() },
-                { SceneStatesNames.SecondPlayerTurn, new SecondPlayerTurn() }
-            };
         }
     }
 }

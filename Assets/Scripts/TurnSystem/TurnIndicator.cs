@@ -16,18 +16,17 @@ namespace SceneStateSystem
         {
             Debug.Log(_stateManager);
             _meshRenderer = GetComponent<MeshRenderer>();
-            SwitchTurn(_stateManager.curentStateName);
             
-            _stateManager.OnSceneStateChanged += SwitchTurn;
+            _stateManager.OnNewPlayerTurn += SwitchTurn;
         }
 
-        public void SwitchTurn(SceneStatesNames newStateNane)
+        public void SwitchTurn(IPlayerTurn newStateNane)
         {
-            if (newStateNane == SceneStatesNames.FirstPlayerTurn)
+            if (newStateNane.playerID == 1)
             {
                 _meshRenderer.material = first;
             }
-            if (newStateNane == SceneStatesNames.SecondPlayerTurn)
+            if (newStateNane.playerID == 2)
             {
                 _meshRenderer.material = second;
             }

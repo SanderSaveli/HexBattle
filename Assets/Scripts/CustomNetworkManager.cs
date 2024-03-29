@@ -7,6 +7,7 @@ public class CustomNetworkManager : NetworkManager
 {
 
     [Inject] private IStateManager _stateManager;
+    private int nextPlayerID = 1;
     public override void OnStartServer()
     {
         NetworkServer.RegisterHandler<AddPlayerMessage>(OnServerAddPlayer);
@@ -20,14 +21,17 @@ public class CustomNetworkManager : NetworkManager
 
         PlayerObj identity = player.GetComponent<PlayerObj>();
 
-        // Присваиваем уникальные идентификаторы игрокам
-        if (numPlayers == 1)
-        {
-            identity.playerID = 1; // Первый игрок
-        }
-        else if (numPlayers == 2)
-        {
-            identity.playerID = 2; // Второй игрок
-        }
+        identity.playerID = nextPlayerID;
+        nextPlayerID++;
+        _stateManager.AddPlayer(identity.playerID);
+    }
+    public override void OnServerDisconnect(NetworkConnectionToClient conn)
+    {
+        GameObject player = conn.identity.gameObject;
+
+        PlayerObj identity = player.GetComponent<PlayerObj>();
+
+        _stateManager.RemovePlayer(identity.playerID);
+        base.OnServerDisconnect(conn);
     }
 }
