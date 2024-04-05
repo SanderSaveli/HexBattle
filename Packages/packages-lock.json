@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.sandersaveli.eventbus": {
+      "version": "https://github.com/SanderSaveli/Unity-EventBusPackege.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "89e67ec600a8a332e3156af7c5da8b3398ba59f1"
+    },
     "com.unity.2d.animation": {
       "version": "9.1.0",
       "depth": 1,

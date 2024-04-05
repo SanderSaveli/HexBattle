@@ -3,12 +3,14 @@ using SceneStateSystem;
 using UnityEngine;
 using Zenject;
 
-public class PlayerObj : NetworkBehaviour
+public class NetworkPlayerEntity : NetworkBehaviour, INetworkPlayer
 {
     [SyncVar]
     public int playerID;
 
     [Inject] private IStateManager stateManager;
+
+    int INetworkPlayer.playerID => playerID;
 
     public override void OnStartServer()
     {

@@ -5,16 +5,16 @@ namespace CellField2D
 {
     public abstract class CellField<TCell> : ICellField<TCell> where TCell : I2DCell
     {
-        protected Dictionary<Vector2, TCell> _field;
+        protected Dictionary<Vector2Int, TCell> _field = new();
 
         #region GetCell
 
-        public TCell GetCell(int x, int y) => GetCell(new Vector2(x, y));
+        public TCell GetCell(int x, int y) => GetCell(new Vector2Int(x, y));
 
-        public TCell GetCell(Vector2 coordinates) => _field[coordinates];
-        public bool TryGetCell(int x, int y, out TCell cell) => TryGetCell(new Vector2(x, y), out cell);
+        public TCell GetCell(Vector2Int coordinates) => _field[coordinates];
+        public bool TryGetCell(int x, int y, out TCell cell) => TryGetCell(new Vector2Int(x, y), out cell);
 
-        public bool TryGetCell(Vector2 coordinates, out TCell cell)
+        public bool TryGetCell(Vector2Int coordinates, out TCell cell)
         {
             if (FieldContainsCell(coordinates))
             {
@@ -36,28 +36,28 @@ namespace CellField2D
 
         public bool FieldContainsCell(int x, int y)
         {
-            return FieldContainsCell(new Vector2(x, y));
+            return FieldContainsCell(new Vector2Int(x, y));
         }
 
-        public bool FieldContainsCell(Vector2 coordinates)
+        public bool FieldContainsCell(Vector2Int coordinates)
         {
             return _field.ContainsKey(coordinates);
         }
         #endregion
 
         #region GetCellNeighbours
-        public List<TCell> GetCellNeighbours(int x, int y) => GetCellNeighbours(new Vector2(x, y));
+        public List<TCell> GetCellNeighbours(int x, int y) => GetCellNeighbours(new Vector2Int(x, y));
 
         public List<TCell> GetCellNeighbours(TCell cell) => GetCellNeighbours(cell.coordinates);
 
-        public List<TCell> GetCellNeighbours(Vector2 coordinates)
+        public List<TCell> GetCellNeighbours(Vector2Int coordinates)
         {
             List<TCell> neighbours = new List<TCell>();
-            List<Vector2> neighbourOffsets = GetCellNeighboursOffsets(coordinates);
+            List<Vector2Int> neighbourOffsets = GetCellNeighboursOffsets(coordinates);
 
-            foreach (Vector2 offset in neighbourOffsets)
+            foreach (Vector2Int offset in neighbourOffsets)
             {
-                Vector2 potentialNeighbour = offset + coordinates;
+                Vector2Int potentialNeighbour = offset + coordinates;
                 if (FieldContainsCell(potentialNeighbour))
                 {
                     neighbours.Add(GetCell(potentialNeighbour));
@@ -82,12 +82,12 @@ namespace CellField2D
         #region IsCellNeighbours
         public bool IsCellNeighbours(TCell ACell, TCell BCell) => IsCellNeighbours(ACell.coordinates, BCell.coordinates);
 
-        public bool IsCellNeighbours(int Ax, int Ay, int Bx, int By) => IsCellNeighbours(new Vector2(Ax, Ay), new Vector2(Bx, By));
+        public bool IsCellNeighbours(int Ax, int Ay, int Bx, int By) => IsCellNeighbours(new Vector2Int(Ax, Ay), new Vector2Int(Bx, By));
 
-        public bool IsCellNeighbours(Vector2 Acoordinates, Vector2 Bcoordinates)
+        public bool IsCellNeighbours(Vector2Int Acoordinates, Vector2Int Bcoordinates)
         {
-            List<Vector2> neighbourOffsets = GetCellNeighboursOffsets(Acoordinates);
-            foreach (Vector2 offset in neighbourOffsets)
+            List<Vector2Int> neighbourOffsets = GetCellNeighboursOffsets(Acoordinates);
+            foreach (Vector2Int offset in neighbourOffsets)
             {
                 if (Acoordinates + offset == Bcoordinates)
                     return true;
@@ -97,10 +97,10 @@ namespace CellField2D
         #endregion
 
         #region RemoveCell
-        public void RemoveCell(int x, int y) => RemoveCell(new Vector2(x, y));
+        public void RemoveCell(int x, int y) => RemoveCell(new Vector2Int(x, y));
 
         public void RemoveCell(TCell cell) => RemoveCell(cell.coordinates);
-        public void RemoveCell(Vector2 coordinates)
+        public void RemoveCell(Vector2Int coordinates)
         {
             if (FieldContainsCell(coordinates))
             {
@@ -109,7 +109,7 @@ namespace CellField2D
         }
         #endregion
 
-        protected abstract List<Vector2> GetCellNeighboursOffsets(Vector2 coordinates);
+        protected abstract List<Vector2Int> GetCellNeighboursOffsets(Vector2Int coordinates);
     }
 }
 
